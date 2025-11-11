@@ -82,10 +82,10 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
-    list_display = ('session_id', 'user', 'start_time', 'end_time', 'last_ping', 'duration', 'is_active')
+    list_display = ('session_id', 'user', 'start_time', 'end_time', 'duration', 'is_active')
     list_filter = ('start_time', 'end_time', 'user')
     search_fields = ('session_id', 'user__username')
-    readonly_fields = ('session_id', 'start_time', 'end_time', 'last_ping', 'duration')
+    readonly_fields = ('session_id', 'start_time', 'end_time', 'duration')
     date_hierarchy = 'start_time'
     
     def is_active(self, obj):

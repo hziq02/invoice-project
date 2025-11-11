@@ -68,7 +68,7 @@ class Session(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Which user
     start_time = models.DateTimeField()  # When session started
     end_time = models.DateTimeField(null=True, blank=True)  # When session ended (null if still active)
-    last_ping = models.DateTimeField(null=True, blank=True)  # Last heartbeat ping
+    last_ping = models.DateTimeField(null=True, blank=True)  # DEPRECATED: Not used anymore (kept for database compatibility)
     duration = models.IntegerField(null=True, blank=True)  # Total session duration in seconds
     
     def __str__(self):

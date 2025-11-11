@@ -14,6 +14,7 @@ class SessionSerializer(serializers.ModelSerializer):
     """
     Serializer for Session model
     Converts Session objects to/from JSON for API
+    Note: last_ping is deprecated and not used (kept for backward compatibility)
     """
     class Meta:
         model = Session
