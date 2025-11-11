@@ -43,6 +43,8 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const handleLogout = async () => {
+  // Clear auth and navigate
+  // Session will be auto-ended by event-based tracking (browser events)
   authStore.logout()
   await navigateTo('/login')
 }

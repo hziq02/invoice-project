@@ -1,52 +1,57 @@
 <template>
-  <div>
+  <NuxtLayout>
     <NuxtPage />
-  </div>
+  </NuxtLayout>
 </template>
 
 <script setup>
 const authStore = useAuthStore()
 
 // Import tracking functions
-import { startSession, startHeartbeat, stopHeartbeat } from '~/src/utils/tracking'
-
-let heartbeatInterval = null
+import { startSession, endSession, initEventTracking } from '~/src/utils/tracking/index.js'
 
 onMounted(async () => {
+  if (!process.client) {
+    return
+  }
+  
   // Initialize auth first
   authStore.initAuth()
   
+  // Initialize event-based tracking (beforeunload, visibilitychange)
+  initEventTracking()
+  
   // Start tracking ONLY if user is authenticated
-  // Double check to ensure token exists and is valid
-  if (process.client && authStore.isAuthenticated && authStore.token) {
+  if (authStore.isAuthenticated && authStore.token) {
     // Wait a bit to ensure everything is loaded
     setTimeout(async () => {
       // Double check again before starting tracking
       if (authStore.isAuthenticated && authStore.token) {
-        // IMPORTANT: Wait for session to be created before starting heartbeat
-        await startSession()  // Create new session in database (wait for it to complete)
-        heartbeatInterval = startHeartbeat()  // Start pinging every 1 minute
+        await startSession()
       }
-    }, 500)
+    }, 100)
   }
 })
 
 // Watch for authentication changes
-watch(() => authStore.isAuthenticated, (isAuthenticated) => {
-  if (!isAuthenticated) {
-    // User logged out or token invalid - stop heartbeat
-    if (heartbeatInterval) {
-      stopHeartbeat(heartbeatInterval)
-      heartbeatInterval = null
+watch(() => authStore.isAuthenticated, (isAuthenticated, wasAuthenticated) => {
+  if (!isAuthenticated && wasAuthenticated) {
+    // User just logged out - end session
+    endSession().catch(() => {})
+    
+    // Clear persistent flags
+    if (process.client) {
+      sessionStorage.removeItem('session_started')
+      sessionStorage.removeItem('session_ended')
+      sessionStorage.removeItem('current_page')
     }
   }
 })
 
-onUnmounted(() => {
-  // Clean up heartbeat when app closes
-  if (heartbeatInterval) {
-    stopHeartbeat(heartbeatInterval)
-    heartbeatInterval = null
+onBeforeUnmount(() => {
+  // End session when component unmounts (user navigates away)
+  if (process.client && authStore.isAuthenticated) {
+    endSession().catch(() => {})
   }
 })
 </script>

@@ -19,6 +19,8 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' }
       ]
     }
-  }
+  },
+  // Fix hydration mismatch by disabling SSR for client-only components
+  ssr: true
 })
 

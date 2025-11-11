@@ -37,6 +37,12 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
+      // Import endSession for cleanup
+      if (process.client) {
+        const { endSession } = await import('~/src/utils/tracking/index.js')
+        endSession().catch(() => {})
+      }
+      
       this.token = null
       this.user = null
       this.refreshToken = null
@@ -45,8 +51,10 @@ export const useAuthStore = defineStore('auth', {
         localStorage.removeItem('refreshToken')
         // Clear tracking session data
         localStorage.removeItem('session_id')
-        // Clear sessionStorage (page tracking data)
-        sessionStorage.clear()
+        // Clear tracking flags
+        sessionStorage.removeItem('session_started')
+        sessionStorage.removeItem('session_ended')
+        sessionStorage.removeItem('current_page')
       }
     },
 

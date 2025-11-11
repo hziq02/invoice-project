@@ -1,4 +1,4 @@
-import { startPageEvent, endPageEvent } from '~/src/utils/tracking'
+import { startPageEvent, endPageEvent } from '~/src/utils/tracking/index.js'
 
 export default defineNuxtRouteMiddleware((to, from) => {
   const authStore = useAuthStore()
