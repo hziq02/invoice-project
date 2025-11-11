@@ -9,6 +9,9 @@ const authStore = useAuthStore()
 
 // Import tracking functions
 import { startSession, endSession, initEventTracking } from '~/src/utils/tracking/index.js'
+import { useIdle } from '@vueuse/core' // For idle detection
+
+const { idle } = useIdle(3 * 60 * 1000) // 3 minutes idle
 
 onMounted(async () => {
   if (!process.client) {
@@ -54,6 +57,24 @@ onBeforeUnmount(() => {
     endSession().catch(() => {})
   }
 })
+
+// Watch idle state for session management
+watch(idle, async (isIdle) => {
+  // Only track if user is authenticated
+  if (!process.client || !authStore.isAuthenticated || !authStore.token) {
+    return
+  }
+  
+  if (isIdle) {
+    // User became idle - End current session
+    await endSession()
+  } else {
+    // User became active again - Start new session
+    // Clear flags first to allow new session
+    sessionStorage.removeItem('session_started')
+    sessionStorage.removeItem('session_ended')
+    await startSession()
+  }
+})
+
 </script>
-
-
